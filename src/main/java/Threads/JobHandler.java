@@ -24,7 +24,9 @@ public class JobHandler extends Thread {
     @Override
     public void run() {
         try {
-            waiting();
+            synchronized (this) {
+                waiting();
+            }
             semaphore.acquire();
             boolean failed = false;
             while (progressCounter != 0) {
@@ -65,6 +67,11 @@ public class JobHandler extends Thread {
                     .anyMatch(job -> job.getId().equals(this.job.getId()) || job.getType().equals(this.job.getType()));
             if(!continueWait) {
                 this.job.setWaiting(false);
+            }
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
             }
         }
     }
